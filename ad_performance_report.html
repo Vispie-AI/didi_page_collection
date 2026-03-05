@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petlibro 广告投放分析报告 · US & DE · 近30天</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0d12;
+    --surface: #111520;
+    --surface2: #161c2a;
+    --border: #1e2840;
+    --us: #4af0a0;
+    --de: #4ab0f0;
+    --warn: #f0b040;
+    --danger: #f05060;
+    --muted: #4a5580;
+    --text: #d8e0f0;
+    --text-dim: #7080a0;
+    --accent: #6070ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 40px;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #0d1a40 0%, var(--bg) 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 40px),
+                repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 40px);
+  }
+  .cover-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .cover h1 {
+    font-size: clamp(32px, 5vw, 60px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .cover h1 .us-tag { color: var(--us); }
+  .cover h1 .de-tag { color: var(--de); }
+  .cover-sub {
+    font-size: 16px;
+    color: var(--text-dim);
+    max-width: 560px;
+    position: relative;
+    margin-bottom: 48px;
+  }
+  .cover-stats {
+    display: flex;
+    gap: 48px;
+    position: relative;
+  }
+  .cover-stat-item { text-align: center; }
+  .cover-stat-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--us);
+  }
+  .cover-stat-item:nth-child(2) .cover-stat-num { color: var(--de); }
+  .cover-stat-item:nth-child(3) .cover-stat-num { color: var(--warn); }
+  .cover-stat-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ── LAYOUT ── */
+  .doc {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 60px 40px;
+  }
+
+  /* ── SECTION HEADER ── */
+  .market-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 64px 0 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .market-flag {
+    font-size: 36px;
+    line-height: 1;
+  }
+  .market-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .market-title.us { color: var(--us); }
+  .market-title.de { color: var(--de); }
+  .market-subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  /* ── DIM HEADER ── */
+  .dim-block {
+    margin-bottom: 56px;
+  }
+  .dim-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .dim-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: -0.3px;
+  }
+
+  /* ── CARD GRID ── */
+  .card-row {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .card-row.cols2 { grid-template-columns: 1fr 1fr; }
+  .card-row.cols3 { grid-template-columns: repeat(3, 1fr); }
+  .card-row.cols4 { grid-template-columns: repeat(4, 1fr); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+  }
+  .card.chart-card {
+    padding: 24px;
+  }
+  .card-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .card-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 26px;
+    font-weight: 600;
+  }
+  .card-value.green { color: var(--us); }
+  .card-value.blue { color: var(--de); }
+  .card-value.warn { color: var(--warn); }
+  .card-value.danger { color: var(--danger); }
+  .card-delta {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .delta-up { color: var(--danger); }
+  .delta-down { color: var(--us); }
+
+  /* ── INSIGHT BOX ── */
+  .insight {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: #a0b4d0;
+    line-height: 1.7;
+  }
+  .insight strong { color: var(--text); }
+  .insight.warn { border-color: var(--warn); }
+  .insight.danger { border-color: var(--danger); }
+  .insight.good { border-color: var(--us); }
+
+  /* ── CHART WRAPPER ── */
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow-x: auto;
+    margin-top: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  thead tr {
+    background: var(--surface2);
+  }
+  th {
+    padding: 10px 14px;
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  th:first-child { text-align: left; }
+  td {
+    padding: 8px 14px;
+    text-align: right;
+    border-bottom: 1px solid rgba(30,40,64,0.6);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+  }
+  td:first-child {
+    text-align: left;
+    color: var(--text-dim);
+    font-family: 'Sora', sans-serif;
+    font-size: 12.5px;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-good { color: var(--us) !important; }
+  .td-warn { color: var(--warn) !important; }
+  .td-danger { color: var(--danger) !important; }
+  .td-star { color: var(--warn) !important; font-weight: 600; }
+
+  /* ── COMPARISON PANEL ── */
+  .compare-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .compare-side {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .compare-market {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .compare-market.us { color: var(--us); }
+  .compare-market.de { color: var(--de); }
+  .compare-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(30,40,64,0.5);
+    font-size: 12px;
+  }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-key { color: var(--text-dim); }
+  .compare-val { font-family: 'IBM Plex Mono', monospace; }
+
+  /* ── PRODUCT GRID ── */
+  .product-trend-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .product-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .trend-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 400;
+  }
+  .trend-up { background: rgba(74,240,160,0.12); color: var(--us); }
+  .trend-down { background: rgba(240,80,96,0.12); color: var(--danger); }
+  .trend-flat { background: rgba(74,176,240,0.12); color: var(--de); }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-dim);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* ── SUMMARY CALLOUT ── */
+  .callout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  .callout {
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid;
+  }
+  .callout.danger { background: rgba(240,80,96,0.06); border-color: rgba(240,80,96,0.3); }
+  .callout.good { background: rgba(74,240,160,0.06); border-color: rgba(74,240,160,0.3); }
+  .callout-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .callout.danger .callout-title { color: var(--danger); }
+  .callout.good .callout-title { color: var(--us); }
+  .callout ul { padding-left: 16px; }
+  .callout li { font-size: 13px; color: var(--text-dim); line-height: 1.8; }
+  .callout li strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ COVER ═══════════════════════════════ -->
+<div class="cover">
+  <div class="cover-badge">Petlibro · Ad Performance Report</div>
+  <h1>近30天广告投放深度分析<br><span class="us-tag">🇺🇸 美国</span> &amp; <span class="de-tag">🇩🇪 德国</span></h1>
+  <p class="cover-sub">2026年2月2日 — 3月3日 · 6维度细颗粒度数据分析 · 含每日趋势 / 产品线 / 频率疲劳</p>
+  <div class="cover-stats">
+    <div class="cover-stat-item">
+      <div class="cover-stat-num">$172,802</div>
+      <div class="cover-stat-label">US 总花费</div>
+    </div>
+    <div class="cover-stat-item">
+      <div class="cover-stat-num">$27,557</div>
+      <div class="cover-stat-label">DE 总花费</div>
+    </div>
+    <div class="cover-stat-item">
+      <div class="cover-stat-num">6,992</div>
+      <div class="cover-stat-label">US 总购买</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DOC ═══════════════════════════════ -->
+<div class="doc">
+
+<!-- ─────────────────── US MARKET ─────────────────── -->
+<div class="market-header">
+  <div class="market-flag">🇺🇸</div>
+  <div>
+    <div class="market-title us">US 市场 — 30天深度分析</div>
+    <div class="market-subtitle">2026-02-02 → 2026-03-03 · 总花费 $172,802 · 总购买 5,201次</div>
+  </div>
+</div>
+
+<!-- ── US DIM 1: Daily Trend ── -->
+<div class="dim-block">
+  <div class="dim-label">维度 01</div>
+  <div class="dim-title">每日花费 / CPA 趋势</div>
+
+  <div class="card-row cols4">
+    <div class="card">
+      <div class="card-label">月内最低 CPA</div>
+      <div class="card-value green">$22.5</div>
+      <div class="card-delta delta-down">2月28日触底</div>
+    </div>
+    <div class="card">
+      <div class="card-label">月内最高 CPA</div>
+      <div class="card-value danger">$45.1</div>
+      <div class="card-delta delta-up">2月21日峰值</div>
+    </div>
+    <div class="card">
+      <div class="card-label">日均花费</div>
+      <div class="card-value">$5,760</div>
+      <div class="card-delta" style="color:var(--text-dim)">区间 $4.8K–$6.7K</div>
+    </div>
+    <div class="card">
+      <div class="card-label">2/21→2/28 CPA 降幅</div>
+      <div class="card-value green">−50%</div>
+      <div class="card-delta delta-down">$45.1 → $22.5</div>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:280px">
+      <canvas id="usDailyChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>结论：</strong>2月前三周 CPA 在 $28–$45 高位震荡，<strong>2/21（$45.1）为全月峰值</strong>。此后连续7天单边下行，至2/28触底 $22.5，降幅50%。花费全程稳定在 $5–6K 区间，说明 CPA 改善来自真实效率提升，而非缩量。3月初小幅回弹后再度收敛，趋势延续。
+  </div>
+
+  <div class="table-wrap">
+    <table id="usDailyTable">
+      <thead>
+        <tr>
+          <th>日期</th>
+          <th>花费($)</th>
+          <th>购买</th>
+          <th>CPA($)</th>
+          <th>展示</th>
+          <th>点击</th>
+          <th>CTR(%)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── US DIM 2: Video vs Image ── -->
+<div class="dim-block">
+  <div class="dim-label">维度 02</div>
+  <div class="dim-title">视频 vs 图片素材效率对比</div>
+
+  <div class="compare-panel">
+    <div class="compare-side">
+      <div class="compare-market us">🎬 视频素材</div>
+      <div class="compare-row"><span class="compare-key">素材数量</span><span class="compare-val">43 条</span></div>
+      <div class="compare-row"><span class="compare-key">总花费</span><span class="compare-val">$46,798</span></div>
+      <div class="compare-row"><span class="compare-key">购买数</span><span class="compare-val">1,524</span></div>
+      <div class="compare-row"><span class="compare-key">CPA</span><span class="compare-val td-good">$30.7</span></div>
+      <div class="compare-row"><span class="compare-key">CTR</span><span class="compare-val td-good">1.34%</span></div>
+    </div>
+    <div class="compare-side">
+      <div class="compare-market de" style="color:var(--text-dim)">🖼️ 图片素材</div>
+      <div class="compare-row"><span class="compare-key">素材数量</span><span class="compare-val">311 条</span></div>
+      <div class="compare-row"><span class="compare-key">总花费</span><span class="compare-val">$126,004</span></div>
+      <div class="compare-row"><span class="compare-key">购买数</span><span class="compare-val">3,677</span></div>
+      <div class="compare-row"><span class="compare-key">CPA</span><span class="compare-val td-warn">$34.3</span></div>
+      <div class="compare-row"><span class="compare-key">CTR</span><span class="compare-val">0.87%</span></div>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:220px">
+      <canvas id="usVideoImgChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight good">
+    <strong>结论：</strong>视频 CPA 低 $3.6（−10.5%），CTR 高 54%。但图片体量是视频的 <strong>7.2倍（311 vs 43条）</strong>，说明视频产能严重不足。<strong>视频是 US 市场最大的增长杠杆</strong> — 每增加一条中等视频素材，预期比图片多带来 10% 的转化效率。
+  </div>
+</div>
+
+<!-- ── US DIM 4: Frequency vs CPA ── -->
+<div class="dim-block">
+  <div class="dim-label">维度 04</div>
+  <div class="dim-title">频率 vs CPA — 疲劳拐点分析</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:300px">
+      <canvas id="usFreqChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight warn">
+    <strong>疲劳拐点 ≈ 频率 6.0：</strong>频率 3.0–5.3 是效率甜蜜区（CPA $17–$34）。频率超过 6.0 后 CPA 开始上浮（AF301 频率6.3 → CPA $37.0）。<br>
+    ⚠️ <strong>Luma 猫砂盆系列（频率1.6–2.2 但 CPA $151–$267）</strong> — 不是疲劳问题，是素材本身转化力不足。<br>
+    ✅ KOL 素材例外：LB001 KOL Launch 频率7.3 但 CPA $31.3，说明 KOL 内容的抗疲劳能力更强。
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Campaign</th><th>频率</th><th>花费($)</th><th>购买</th><th>CPA($)</th><th>判断</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>LB001 Cat-People ViewContent</td><td>1.6</td><td>677</td><td>0</td><td>—</td><td class="td-warn">⚠️ 零转化</td></tr>
+        <tr><td>LB001 Cat-People ATC</td><td>1.6</td><td>669</td><td>0</td><td>—</td><td class="td-warn">⚠️ 零转化</td></tr>
+        <tr><td>SALE1 Maxconv</td><td>1.6</td><td>1,208</td><td>8</td><td class="td-danger">151.1</td><td class="td-danger">🚨 素材问题</td></tr>
+        <tr><td>LB001 PDP AB Test</td><td>1.8</td><td>2,942</td><td>11</td><td class="td-danger">267.4</td><td class="td-danger">🚨 最差</td></tr>
+        <tr><td>LB001 Maxvalue</td><td>2.1</td><td>8,682</td><td>54</td><td class="td-danger">160.8</td><td class="td-danger">🚨 暂停</td></tr>
+        <tr><td>LB001 Cat-People Maxvalue</td><td>2.2</td><td>6,459</td><td>31</td><td class="td-danger">208.4</td><td class="td-danger">🚨 暂停</td></tr>
+        <tr><td>WFDS2 KOL</td><td>2.2</td><td>3,352</td><td>67</td><td class="td-warn">50.0</td><td>⚠️ 冷启动</td></tr>
+        <tr><td>SALE1 Copy</td><td>2.9</td><td>3,078</td><td>20</td><td class="td-danger">153.9</td><td class="td-danger">🚨 低效</td></tr>
+        <tr><td>Ongoing Audience Test</td><td>3.0</td><td>17,172</td><td>506</td><td>33.9</td><td>✅ 健康</td></tr>
+        <tr><td>LB001 Max Conv Test</td><td>3.7</td><td>10,714</td><td>226</td><td class="td-warn">47.4</td><td>⚠️ 一般</td></tr>
+        <tr><td>PC001 Launch</td><td>3.9</td><td>14,378</td><td>396</td><td>36.3</td><td>✅ 健康</td></tr>
+        <tr><td>AF301 CPA Bidding</td><td>4.1</td><td>10,711</td><td>282</td><td>38.0</td><td>✅ 健康</td></tr>
+        <tr><td>AF203 Maxvalue</td><td>4.3</td><td>8,992</td><td>511</td><td class="td-good">17.6</td><td class="td-good">⭐ 甜蜜区</td></tr>
+        <tr><td>AF109 Maxconv</td><td>4.5</td><td>9,920</td><td>321</td><td>30.9</td><td>✅ 健康</td></tr>
+        <tr><td>Catalog ASC</td><td>4.9</td><td>14,045</td><td>517</td><td>27.2</td><td>✅ 健康</td></tr>
+        <tr><td>Sale Catalog ASC</td><td>5.2</td><td>7,732</td><td>229</td><td>33.8</td><td>✅ 健康</td></tr>
+        <tr><td>WF116 Maxconv</td><td>5.3</td><td>22,347</td><td>1,168</td><td class="td-good">19.1</td><td class="td-good">⭐ 甜蜜区</td></tr>
+        <tr><td>AF301 Maxconv</td><td>6.3</td><td>13,827</td><td>374</td><td class="td-warn">37.0</td><td>⚠️ 开始疲劳</td></tr>
+        <tr><td>LB001 KOL Launch</td><td>7.3</td><td>15,042</td><td>481</td><td>31.3</td><td class="td-good">✅ KOL抗疲劳</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── US DIM 5: Product Weekly Trend ── -->
+<div class="dim-block">
+  <div class="dim-label">维度 05</div>
+  <div class="dim-title">产品线周趋势</div>
+
+  <div class="product-trend-grid">
+    <!-- Feeder -->
+    <div class="product-card">
+      <div class="product-name">🍽️ Feeder <span class="trend-badge trend-up">持续向好 ↗</span></div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">CPA 4周降幅 −45% · W4购买量+83%</div>
+      <div style="height:160px"><canvas id="usFeederChart"></canvas></div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table><thead><tr><th>周</th><th>花费</th><th>购买</th><th>CPA</th><th>CTR</th></tr></thead>
+        <tbody>
+          <tr><td>W1 (2/2)</td><td>9,468</td><td>236</td><td class="td-warn">40.1</td><td>0.89%</td></tr>
+          <tr><td>W2 (2/9)</td><td>10,134</td><td>336</td><td>30.2</td><td>0.80%</td></tr>
+          <tr><td>W3 (2/16)</td><td>11,148</td><td>355</td><td>31.4</td><td>1.05%</td></tr>
+          <tr><td>W4 (2/23)</td><td>9,841</td><td>432</td><td class="td-good">22.8</td><td>1.11%</td></tr>
+          <tr><td>W5 (3/2)</td><td>2,858</td><td>129</td><td class="td-good">22.2</td><td>1.19%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <!-- Fountain -->
+    <div class="product-card">
+      <div class="product-name">💧 Fountain <span class="trend-badge trend-flat">稳定低位 →</span></div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">全场最低稳定 CPA · W4触底$17.0</div>
+      <div style="height:160px"><canvas id="usFountainChart"></canvas></div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table><thead><tr><th>周</th><th>花费</th><th>购买</th><th>CPA</th><th>CTR</th></tr></thead>
+        <tbody>
+          <tr><td>W1 (2/2)</td><td>6,389</td><td>274</td><td>23.3</td><td>0.63%</td></tr>
+          <tr><td>W2 (2/9)</td><td>6,130</td><td>264</td><td>23.2</td><td>0.62%</td></tr>
+          <tr><td>W3 (2/16)</td><td>5,964</td><td>271</td><td>22.0</td><td>0.73%</td></tr>
+          <tr><td>W4 (2/23)</td><td>5,665</td><td>333</td><td class="td-good">17.0</td><td>0.57%</td></tr>
+          <tr><td>W5 (3/2)</td><td>1,551</td><td>93</td><td class="td-good">16.7</td><td>0.67%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <!-- Luma -->
+    <div class="product-card" style="border-color:rgba(240,80,96,0.3)">
+      <div class="product-name">🚽 Luma 猫砂盆 <span class="trend-badge trend-down">持续恶化 ↘</span></div>
+      <div style="font-size:12px;color:var(--danger);margin-bottom:12px">CPA 4周升幅 +78% · 购买量从245→39萎缩</div>
+      <div style="height:160px"><canvas id="usLumaChart"></canvas></div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table><thead><tr><th>周</th><th>花费</th><th>购买</th><th>CPA</th><th>加购</th><th>CTR</th></tr></thead>
+        <tbody>
+          <tr><td>W1 (2/2)</td><td>10,565</td><td>245</td><td class="td-warn">43.1</td><td>407</td><td>1.03%</td></tr>
+          <tr><td>W2 (2/9)</td><td>11,252</td><td>185</td><td class="td-danger">60.8</td><td>421</td><td>1.11%</td></tr>
+          <tr><td>W3 (2/16)</td><td>10,283</td><td>153</td><td class="td-danger">67.2</td><td>512</td><td>1.53%</td></tr>
+          <tr><td>W4 (2/23)</td><td>10,089</td><td>181</td><td class="td-danger">55.7</td><td>505</td><td>2.09%</td></tr>
+          <tr><td>W5 (3/2)</td><td>2,997</td><td>39</td><td class="td-danger">76.8</td><td>155</td><td>2.23%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <!-- Catalog -->
+    <div class="product-card">
+      <div class="product-name">📦 Catalog <span class="trend-badge trend-flat">平稳基盘 →</span></div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">CPA $28–$35 区间 · W4小幅下探$28.2</div>
+      <div style="height:160px"><canvas id="usCatalogChart"></canvas></div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table><thead><tr><th>周</th><th>花费</th><th>购买</th><th>CPA</th><th>CTR</th></tr></thead>
+        <tbody>
+          <tr><td>W1 (2/2)</td><td>6,897</td><td>212</td><td>32.5</td><td>0.87%</td></tr>
+          <tr><td>W2 (2/9)</td><td>6,942</td><td>223</td><td>31.1</td><td>0.92%</td></tr>
+          <tr><td>W3 (2/16)</td><td>7,208</td><td>213</td><td>33.8</td><td>1.08%</td></tr>
+          <tr><td>W4 (2/23)</td><td>8,483</td><td>301</td><td class="td-good">28.2</td><td>0.98%</td></tr>
+          <tr><td>W5 (3/2)</td><td>2,543</td><td>74</td><td>34.4</td><td>1.13%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promo full width -->
+  <div class="product-card" style="margin-bottom:16px">
+    <div class="product-name">🏷️ Promo <span class="trend-badge trend-up">大幅改善 ↗</span></div>
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">W1→W4 CPA 降幅 −57% · $76.0 → $33.0</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+      <div style="height:200px"><canvas id="usPromoChart"></canvas></div>
+      <div class="table-wrap" style="margin-top:0">
+        <table><thead><tr><th>周</th><th>花费</th><th>购买</th><th>CPA</th><th>加购</th><th>CTR</th></tr></thead>
+        <tbody>
+          <tr><td>W1 (2/2)</td><td>2,736</td><td>36</td><td class="td-danger">76.0</td><td>112</td><td>0.96%</td></tr>
+          <tr><td>W2 (2/9)</td><td>3,474</td><td>69</td><td class="td-warn">50.3</td><td>213</td><td>1.36%</td></tr>
+          <tr><td>W3 (2/16)</td><td>2,993</td><td>67</td><td class="td-warn">44.7</td><td>225</td><td>1.50%</td></tr>
+          <tr><td>W4 (2/23)</td><td>2,176</td><td>66</td><td>33.0</td><td>202</td><td>1.11%</td></tr>
+          <tr><td>W5 (3/2)</td><td>639</td><td>19</td><td>33.7</td><td>43</td><td>1.21%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight danger">
+    🚨 <strong>Luma 猫砂盆红灯：</strong>CPA 4周上升78%，且购买量从245→39单周急剧萎缩，但 CTR 却从1.03%→2.23% 持续上升。说明用户在点击但不购买 — 加购/购买断层极为严重，素材的承诺与产品落地页之间存在根本性转化断裂。需立即关停表现最差 adset，集中预算到 KOL Launch。
+  </div>
+</div>
+
+<!-- ── US DIM 6: Weekly Summary ── -->
+<div class="dim-block">
+  <div class="dim-label">维度 06</div>
+  <div class="dim-title">周同比汇总</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="usWeeklyChart"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>周起始日</th><th>花费($)</th><th>购买</th><th>CPA($)</th><th>加购</th><th>展示</th><th>CTR(%)</th><th>花费 WoW</th><th>CPA WoW</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>W1 · 2026-02-02</td><td>38,965</td><td>1,091</td><td>35.7</td><td>2,207</td><td>4,694,268</td><td>0.87%</td><td>—</td><td>—</td></tr>
+        <tr><td>W2 · 2026-02-09</td><td>40,863</td><td>1,155</td><td>35.4</td><td>2,312</td><td>4,666,589</td><td>0.90%</td><td>+4.9%</td><td>−0.9%</td></tr>
+        <tr><td>W3 · 2026-02-16</td><td>41,188</td><td>1,139</td><td>36.2</td><td>2,646</td><td>4,692,618</td><td>1.11%</td><td>+0.8%</td><td>+2.2%</td></tr>
+        <tr><td>W4 · 2026-02-23</td><td>40,064</td><td class="td-good">1,433</td><td class="td-good">28.0</td><td>2,776</td><td>4,662,742</td><td>1.13%</td><td>−2.7%</td><td class="td-good">−22.7% ⭐</td></tr>
+        <tr><td>W5 · 2026-03-02</td><td>11,722</td><td>384</td><td>30.5</td><td>739</td><td>1,336,094</td><td>1.25%</td><td colspan="2" style="color:var(--text-dim);text-align:center">仅2天不可比</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight good">
+    <strong>W4 (2/23–3/1) 是决定性一周：</strong>花费微降 2.7% 但购买暴涨 26%（1,139→1,433），CPA 下降 23%。这是优化积累效应的集中释放，而非偶然波动。
+  </div>
+</div>
+
+<!-- ─────────────────── DE MARKET ─────────────────── -->
+<hr class="section-divider">
+<div class="market-header">
+  <div class="market-flag">🇩🇪</div>
+  <div>
+    <div class="market-title de">DE 市场 — 30天深度分析</div>
+    <div class="market-subtitle">2026-02-02 → 2026-03-03 · 总花费 $27,557 · 总购买 962次</div>
+  </div>
+</div>
+
+<!-- ── DE DIM 1: Daily Trend ── -->
+<div class="dim-block">
+  <div class="dim-label">维度 01</div>
+  <div class="dim-title">每日花费 / CPA 趋势</div>
+
+  <div class="card-row cols4">
+    <div class="card">
+      <div class="card-label">月内最低 CPA</div>
+      <div class="card-value blue">$20.0</div>
+      <div class="card-delta delta-down">2月28日触底</div>
+    </div>
+    <div class="card">
+      <div class="card-label">月内最高 CPA</div>
+      <div class="card-value danger">$94.9</div>
+      <div class="card-delta delta-up">2月18日峰值</div>
+    </div>
+    <div class="card">
+      <div class="card-label">结构性拐点</div>
+      <div class="card-value blue">2/21</div>
+      <div class="card-delta" style="color:var(--text-dim)">CPA 断崖式下降</div>
+    </div>
+    <div class="card">
+      <div class="card-label">拐点前后 CPA 均值</div>
+      <div class="card-value warn">$62 → $27</div>
+      <div class="card-delta delta-down">降幅 −56%</div>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:280px">
+      <canvas id="deDailyChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight warn">
+    <strong>结论：</strong>2/10–2/20 是 DE 的黑暗期（含 $80.1、$94.9 两个极高异常日），均值约 $62。<strong>2/21 发生结构性断崖</strong>：当日花费从 ~$1,000 降至 $629，疑似关停了某个高消耗低效 campaign，CPA 从此进入 $20–$36 新区间。需确认 2/21 前后的具体操作。
+  </div>
+
+  <div class="table-wrap">
+    <table id="deDailyTable">
+      <thead>
+        <tr>
+          <th>日期</th>
+          <th>花费($)</th>
+          <th>购买</th>
+          <th>CPA($)</th>
+          <th>展示</th>
+          <th>点击</th>
+          <th>CTR(%)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── DE DIM 2: Video vs Image ── -->
+<div class="dim-block">
+  <div class="dim-label">维度 02</div>
+  <div class="dim-title">视频 vs 图片素材效率对比（与 US 完全相反）</div>
+
+  <div class="compare-panel">
+    <div class="compare-side" style="border-color:rgba(240,80,96,0.3)">
+      <div class="compare-market" style="color:var(--danger)">🎬 视频素材 ⚠️</div>
+      <div class="compare-row"><span class="compare-key">素材数量</span><span class="compare-val">66 条</span></div>
+      <div class="compare-row"><span class="compare-key">总花费</span><span class="compare-val">$7,954</span></div>
+      <div class="compare-row"><span class="compare-key">购买数</span><span class="compare-val">171</span></div>
+      <div class="compare-row"><span class="compare-key">CPA</span><span class="compare-val td-danger">$46.5</span></div>
+      <div class="compare-row"><span class="compare-key">CTR（高但不转化）</span><span class="compare-val">2.34%</span></div>
+    </div>
+    <div class="compare-side" style="border-color:rgba(74,240,160,0.3)">
+      <div class="compare-market us">🖼️ 图片素材 ✅</div>
+      <div class="compare-row"><span class="compare-key">素材数量</span><span class="compare-val">148 条</span></div>
+      <div class="compare-row"><span class="compare-key">总花费</span><span class="compare-val">$19,603</span></div>
+      <div class="compare-row"><span class="compare-key">购买数</span><span class="compare-val">620</span></div>
+      <div class="compare-row"><span class="compare-key">CPA</span><span class="compare-val td-good">$31.6</span></div>
+      <div class="compare-row"><span class="compare-key">CTR</span><span class="compare-val">1.17%</span></div>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:220px">
+      <canvas id="deVideoImgChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight danger">
+    ⚠️ <strong>DE 与 US 完全相反</strong>：图片 CPA 比视频低 32%（$31.6 vs $46.5）。视频 CTR 虽高（2.34%）但转化极差，可能因为视频素材缺乏德语本地化，引来的是高漏斗、低购买意向的用户。<strong>DE 应以图片为主，视频必须先做德语 voiceover/字幕后再测试。</strong>
+  </div>
+</div>
+
+<!-- ── DE DIM 4: Frequency vs CPA ── -->
+<div class="dim-block">
+  <div class="dim-label">维度 04</div>
+  <div class="dim-title">频率 vs CPA — 与 US 模式相反</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:300px">
+      <canvas id="deFreqChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight good">
+    <strong>DE 无典型疲劳拐点：</strong>频率最高的 Best Sellers Catalog（频率7.0）反而 CPA 最低（$26.4），呈现"越投越准"的再营销特征。这是一个高度忠诚的受众池。<br>
+    对比 US：低频 = 高 CPA（冷启动成本）；高频 = 高质量再营销目标。<strong>Best Sellers Catalog 是 DE 的金矿，应加大预算。</strong>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Campaign</th><th>频率</th><th>花费($)</th><th>购买</th><th>CPA($)</th><th>判断</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>AF000 新 Cbo</td><td>1.3</td><td>134</td><td>1</td><td class="td-danger">133.8</td><td class="td-warn">⚠️ 冷启动</td></tr>
+        <tr><td>KOL LPV</td><td>1.5</td><td>579</td><td>0</td><td>—</td><td class="td-danger">🚨 关停</td></tr>
+        <tr><td>ASC Catalog 新</td><td>1.6</td><td>128</td><td>2</td><td class="td-warn">64.2</td><td class="td-warn">⚠️ 冷启动</td></tr>
+        <tr><td>ATC Maxconv</td><td>2.7</td><td>891</td><td>9</td><td class="td-danger">99.0</td><td class="td-danger">🚨 低效</td></tr>
+        <tr><td>WFDS2 Cbo</td><td>2.8</td><td>987</td><td>23</td><td class="td-warn">42.9</td><td>⚠️ 一般</td></tr>
+        <tr><td>WF000 ASC Fountain</td><td>3.5</td><td>865</td><td>29</td><td>29.8</td><td>✅ 健康</td></tr>
+        <tr><td>VDay Promo</td><td>3.5</td><td>736</td><td>12</td><td class="td-warn">61.4</td><td>⚠️ 已停</td></tr>
+        <tr><td>Retargeting</td><td>3.6</td><td>1,321</td><td>29</td><td class="td-warn">45.6</td><td>⚠️ 一般</td></tr>
+        <tr><td>KOL-INS Abo</td><td>3.6</td><td>3,212</td><td>84</td><td>38.2</td><td>✅ 健康</td></tr>
+        <tr><td>AF000 Abo</td><td>3.8</td><td>3,425</td><td>64</td><td class="td-warn">53.5</td><td>⚠️ 偏高</td></tr>
+        <tr><td>WFDS2 ASC Launch</td><td>4.5</td><td>3,942</td><td>109</td><td>36.2</td><td>✅ 健康</td></tr>
+        <tr><td>Best Sellers Catalog</td><td>7.0</td><td>11,336</td><td>429</td><td class="td-good">26.4</td><td class="td-good">⭐ 金矿加量</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── DE DIM 5: Product Weekly ── -->
+<div class="dim-block">
+  <div class="dim-label">维度 05</div>
+  <div class="dim-title">产品线周趋势</div>
+
+  <div class="product-trend-grid">
+    <!-- DE Catalog -->
+    <div class="product-card">
+      <div class="product-name">📦 Catalog <span class="trend-badge trend-up">持续改善 ↗</span></div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">W1→W4 CPA 降幅 −27% · 核心基盘</div>
+      <div style="height:160px"><canvas id="deCatalogChart"></canvas></div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table><thead><tr><th>周</th><th>花费</th><th>购买</th><th>CPA</th><th>CTR</th></tr></thead>
+        <tbody>
+          <tr><td>W1 (2/2)</td><td>4,144</td><td>120</td><td>34.5</td><td>1.70%</td></tr>
+          <tr><td>W2 (2/9)</td><td>4,039</td><td>94</td><td class="td-warn">43.0</td><td>1.47%</td></tr>
+          <tr><td>W3 (2/16)</td><td>3,835</td><td>121</td><td>31.7</td><td>1.53%</td></tr>
+          <tr><td>W4 (2/23)</td><td>4,300</td><td>170</td><td class="td-good">25.3</td><td>1.41%</td></tr>
+          <tr><td>W5 (3/2)</td><td>1,150</td><td>48</td><td class="td-good">24.0</td><td>1.43%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <!-- DE Fountain -->
+    <div class="product-card">
+      <div class="product-name">💧 Fountain <span class="trend-badge trend-up">稳步改善 ↗</span></div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">W1→W4 CPA 降幅 −24%</div>
+      <div style="height:160px"><canvas id="deFountainChart"></canvas></div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table><thead><tr><th>周</th><th>花费</th><th>购买</th><th>CPA</th><th>CTR</th></tr></thead>
+        <tbody>
+          <tr><td>W1 (2/2)</td><td>1,204</td><td>30</td><td class="td-warn">40.1</td><td>1.37%</td></tr>
+          <tr><td>W2 (2/9)</td><td>1,316</td><td>31</td><td class="td-warn">42.4</td><td>1.26%</td></tr>
+          <tr><td>W3 (2/16)</td><td>1,226</td><td>37</td><td>33.1</td><td>1.36%</td></tr>
+          <tr><td>W4 (2/23)</td><td>1,524</td><td>50</td><td class="td-good">30.5</td><td>1.29%</td></tr>
+          <tr><td>W5 (3/2)</td><td>524</td><td>13</td><td class="td-warn">40.3</td><td>1.32%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <!-- DE Feeder -->
+    <div class="product-card">
+      <div class="product-name">🍽️ Feeder <span class="trend-badge trend-flat">波动→好转</span></div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">W3异常值$106.5 (仅6购买) · W5回到$34</div>
+      <div style="height:160px"><canvas id="deFeederChart"></canvas></div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table><thead><tr><th>周</th><th>花费</th><th>购买</th><th>CPA</th><th>CTR</th></tr></thead>
+        <tbody>
+          <tr><td>W1 (2/2)</td><td>748</td><td>14</td><td class="td-warn">53.4</td><td>1.91%</td></tr>
+          <tr><td>W2 (2/9)</td><td>1,230</td><td>22</td><td class="td-warn">55.9</td><td>1.76%</td></tr>
+          <tr><td>W3 (2/16)</td><td>639</td><td>6</td><td class="td-danger">106.5</td><td>1.66%</td></tr>
+          <tr><td>W4 (2/23)</td><td>668</td><td>15</td><td class="td-warn">44.5</td><td>1.41%</td></tr>
+          <tr><td>W5 (3/2)</td><td>273</td><td>8</td><td>34.2</td><td>1.49%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <!-- placeholder for symmetry -->
+    <div class="product-card" style="background:var(--surface2);border-style:dashed;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:var(--text-dim)">
+      <div style="font-size:24px;margin-bottom:8px">🏷️</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">Promo</div>
+      <div style="font-size:12px">W3后已停投<br>无后续数据</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DE DIM 6: Weekly Summary ── -->
+<div class="dim-block">
+  <div class="dim-label">维度 06</div>
+  <div class="dim-title">周同比汇总</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="deWeeklyChart"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>周起始日</th><th>花费($)</th><th>购买</th><th>CPA($)</th><th>加购</th><th>展示</th><th>CTR(%)</th><th>花费 WoW</th><th>CPA WoW</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>W1 · 2026-02-02</td><td>6,206</td><td>166</td><td>37.4</td><td>3,150</td><td>685,026</td><td>1.66%</td><td>—</td><td>—</td></tr>
+        <tr><td>W2 · 2026-02-09</td><td>7,025</td><td>155</td><td class="td-danger">45.3</td><td>3,096</td><td>813,052</td><td>1.42%</td><td>+13.2%</td><td class="td-danger">+21.2% ⚠️</td></tr>
+        <tr><td>W3 · 2026-02-16</td><td>5,887</td><td>166</td><td>35.5</td><td>3,440</td><td>662,025</td><td>1.48%</td><td>−16.2%</td><td>−21.8%</td></tr>
+        <tr><td>W4 · 2026-02-23</td><td>6,492</td><td class="td-good">235</td><td class="td-good">27.6</td><td>3,507</td><td>675,382</td><td>1.39%</td><td>+10.3%</td><td class="td-good">−22.1% ⭐</td></tr>
+        <tr><td>W5 · 2026-03-02</td><td>1,948</td><td>69</td><td>28.2</td><td>906</td><td>202,631</td><td>1.42%</td><td colspan="2" style="color:var(--text-dim);text-align:center">仅2天不可比</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight good">
+    <strong>US 与 DE W4 同步改善</strong>（CPA 分别 −22.7% / −21.1%），幅度几乎一致，可能受共同外部因素驱动（竞争环境变化/用户行为周期）。W2 是 DE 最差周（加量但 CPA 恶化 21%），此后连续两周改善。
+  </div>
+</div>
+
+<!-- ─────────────────── CROSS MARKET COMPARISON ─────────────────── -->
+<hr class="section-divider">
+<div class="market-header">
+  <div class="market-flag">⚖️</div>
+  <div>
+    <div class="market-title" style="color:var(--accent)">双市场横向对比分析</div>
+    <div class="market-subtitle">美国 vs 德国 · 全维度差异拆解 · 找到跨市场规律与结构性差异</div>
+  </div>
+</div>
+
+<!-- ── COMPARE 1: Overview KPIs ── -->
+<div class="dim-block">
+  <div class="dim-label">对比 01</div>
+  <div class="dim-title">核心 KPI 全量对比</div>
+
+  <div class="table-wrap" style="margin-bottom:20px">
+    <table>
+      <thead><tr><th>指标</th><th>🇺🇸 美国</th><th>🇩🇪 德国</th><th>差值</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>总花费</td><td>$172,802</td><td>$27,557</td><td style="color:var(--text-dim)">US 是 DE 的 6.3x</td><td style="color:var(--text-dim)">体量差距显著</td></tr>
+        <tr><td>总购买数</td><td class="td-good">5,201</td><td>962</td><td style="color:var(--text-dim)">US 是 DE 的 5.4x</td><td style="color:var(--text-dim)">购买差距小于花费差距</td></tr>
+        <tr><td>整体 CPA</td><td>$33.2</td><td>$28.6</td><td class="td-good">DE 低 $4.6 (−14%)</td><td style="color:var(--text-dim)">德国整体效率更高</td></tr>
+        <tr><td>平均 CTR</td><td>0.98%</td><td class="td-good">1.48%</td><td class="td-good">DE 高 51%</td><td style="color:var(--text-dim)">德国点击率更高</td></tr>
+        <tr><td>总展示量</td><td>138,194,000+</td><td>21,726,000+</td><td style="color:var(--text-dim)">US 是 DE 的 6.4x</td><td style="color:var(--text-dim)">与花费体量匹配</td></tr>
+        <tr><td>加购/购买比</td><td class="td-good">~2.1:1</td><td class="td-danger">17.8:1</td><td class="td-danger">DE 高出 8.5x</td><td style="color:var(--danger)">德国转化漏斗严重断层</td></tr>
+        <tr><td>CPA_ATC</td><td>~$15.8</td><td class="td-good">$1.9</td><td class="td-good">DE 低 88%</td><td style="color:var(--text-dim)">德国加购成本极低</td></tr>
+        <tr><td>视频素材 CPA</td><td class="td-good">$30.7</td><td class="td-danger">$46.5</td><td class="td-danger">DE 高 51%</td><td style="color:var(--danger)">策略方向完全相反</td></tr>
+        <tr><td>图片素材 CPA</td><td>$34.3</td><td class="td-good">$31.6</td><td class="td-good">DE 低 8%</td><td style="color:var(--text-dim)">图片在两市场均有效</td></tr>
+        <tr><td>W4 CPA 改善幅度</td><td class="td-good">−22.7%</td><td class="td-good">−22.1%</td><td style="color:var(--us)">高度同步</td><td style="color:var(--us)">可能受共同外部因素驱动</td></tr>
+        <tr><td>月内 CPA 峰值</td><td class="td-warn">$45.1 (2/21)</td><td class="td-danger">$94.9 (2/18)</td><td class="td-danger">DE 峰值高出 110%</td><td style="color:var(--text-dim)">德国波动更剧烈</td></tr>
+        <tr><td>月内 CPA 谷值</td><td class="td-good">$22.5 (2/28)</td><td class="td-good">$20.0 (2/28)</td><td style="color:var(--us)">同日触底</td><td style="color:var(--us)">两市场同步改善</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-row cols4">
+    <div class="card">
+      <div class="card-label">整体 CPA 差距</div>
+      <div class="card-value blue">DE −14%</div>
+      <div class="card-delta delta-down">$28.6 vs $33.2</div>
+    </div>
+    <div class="card">
+      <div class="card-label">加购/购买比差距</div>
+      <div class="card-value danger">DE 高 8.5x</div>
+      <div class="card-delta delta-up">17.8:1 vs 2.1:1</div>
+    </div>
+    <div class="card">
+      <div class="card-label">CTR 差距</div>
+      <div class="card-value blue">DE +51%</div>
+      <div class="card-delta delta-down">1.48% vs 0.98%</div>
+    </div>
+    <div class="card">
+      <div class="card-label">W4 CPA 改善同步性</div>
+      <div class="card-value green">0.6% 偏差</div>
+      <div class="card-delta delta-down">−22.7% vs −22.1%</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── COMPARE 2: Daily CPA Overlay ── -->
+<div class="dim-block">
+  <div class="dim-label">对比 02</div>
+  <div class="dim-title">美国 vs 德国 — 每日 CPA 走势叠加</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:300px">
+      <canvas id="cpaDualChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>关键发现：</strong>
+    两市场 CPA 走势在多个节点呈现高度同步性——2/28 同日触底（US $22.5 / DE $20.0），W4 同步改善幅度接近（−22.7% vs −22.1%）。但波动幅度差异极大：德国 CPA 峰谷差高达 $74.9（$94.9 → $20.0），美国仅 $22.6（$45.1 → $22.5），说明<strong>德国市场对单个 Campaign 的依赖度更高</strong>，少数高消耗低效 Campaign 的存在会使整体数据剧烈扭曲。
+  </div>
+</div>
+
+<!-- ── COMPARE 3: Weekly CPA side by side ── -->
+<div class="dim-block">
+  <div class="dim-label">对比 03</div>
+  <div class="dim-title">周 CPA 并排对比 — 节奏同步分析</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="weeklyCpaDualChart"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>周</th><th>🇺🇸 US 花费</th><th>🇺🇸 US CPA</th><th>🇩🇪 DE 花费</th><th>🇩🇪 DE CPA</th><th>CPA 差值</th><th>花费比 US/DE</th></tr></thead>
+      <tbody>
+        <tr><td>W1 (2/2)</td><td>$38,965</td><td>$35.7</td><td>$6,206</td><td>$37.4</td><td class="td-warn">DE 高 $1.7</td><td>6.3x</td></tr>
+        <tr><td>W2 (2/9)</td><td>$40,863</td><td>$35.4</td><td>$7,025</td><td class="td-danger">$45.3</td><td class="td-danger">DE 高 $9.9</td><td>5.8x</td></tr>
+        <tr><td>W3 (2/16)</td><td>$41,188</td><td>$36.2</td><td>$5,887</td><td>$35.5</td><td style="color:var(--text-dim)">几乎持平</td><td>7.0x</td></tr>
+        <tr><td><strong>W4 (2/23)</strong></td><td>$40,064</td><td class="td-good"><strong>$28.0</strong></td><td>$6,492</td><td class="td-good"><strong>$27.6</strong></td><td class="td-good">仅差 $0.4 ⭐</td><td>6.2x</td></tr>
+        <tr><td>W5 (3/2, 部分)</td><td>$11,722</td><td>$30.5</td><td>$1,948</td><td>$28.2</td><td class="td-good">DE 低 $2.3</td><td>6.0x</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight good">
+    <strong>W4 高度收敛：</strong>两市场 W4 CPA 仅差 $0.4（$28.0 vs $27.6），这在历史上是极为罕见的同步现象。结合两市场 CPA 改善幅度几乎一致（−22.7% vs −22.1%），<strong>强烈暗示存在共同外部驱动力</strong>——可能是竞争对手同期撤量、Meta 算法调整，或特定时间段的用户购买意愿周期。建议追踪 W5 完整数据验证是否延续。
+  </div>
+</div>
+
+<!-- ── COMPARE 4: Spend efficiency ── -->
+<div class="dim-block">
+  <div class="dim-label">对比 04</div>
+  <div class="dim-title">花费效率对比 — 每千美元花费带来的购买数</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:240px">
+      <canvas id="efficiencyChart"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>周</th><th>🇺🇸 US 购买/千元花费</th><th>🇩🇪 DE 购买/千元花费</th><th>哪个市场更高效</th></tr></thead>
+      <tbody>
+        <tr><td>W1 (2/2)</td><td>28.0</td><td>26.7</td><td style="color:var(--us)">🇺🇸 US 略优</td></tr>
+        <tr><td>W2 (2/9)</td><td>28.3</td><td>22.1</td><td style="color:var(--us)">🇺🇸 US 优</td></tr>
+        <tr><td>W3 (2/16)</td><td>27.7</td><td>28.2</td><td style="color:var(--de)">🇩🇪 DE 略优</td></tr>
+        <tr><td>W4 (2/23)</td><td class="td-good">35.8</td><td class="td-good">36.2</td><td class="td-good">⭐ 两市场并列最佳</td></tr>
+        <tr><td>W5 (3/2)</td><td>32.8</td><td>35.4</td><td style="color:var(--de)">🇩🇪 DE 略优</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <strong>效率趋势：</strong>W4 是两市场同期效率最高峰（均约 36 购买/千元花费）。W1–W3 美国效率通常略高于德国，但 W4 后德国开始反超。总体来看两市场效率差异不大，真正的差距在于<strong>体量</strong>和<strong>转化漏斗健康度</strong>（德国的加购/购买比 17.8:1 是核心隐患）。
+  </div>
+</div>
+
+<!-- ── COMPARE 5: CTR trend ── -->
+<div class="dim-block">
+  <div class="dim-label">对比 05</div>
+  <div class="dim-title">每日 CTR 走势对比 — 用户点击意愿差异</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="ctrDualChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight warn">
+    <strong>CTR 结构差异：</strong>德国 CTR 全程高于美国（均值 1.48% vs 0.98%，高出 51%）。但这个高 CTR 并没有带来对应的高转化率，反而和高加购/购买比（17.8:1）并存——说明德国用户的<strong>点击行为是"浏览性"的</strong>，而非购买驱动。美国用户 CTR 虽低，但点击更精准，转化意图更强（加购/购买比仅 2.1:1）。<strong>德国高 CTR 是虚假繁荣指标，不能作为优化参考。</strong>
+  </div>
+</div>
+
+<!-- ── COMPARE 6: Product line cross-market ── -->
+<div class="dim-block">
+  <div class="dim-label">对比 06</div>
+  <div class="dim-title">相同产品线跨市场 CPA 对比</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:280px">
+      <canvas id="productCrossChart"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>产品线</th><th>🇺🇸 US W1 CPA</th><th>🇺🇸 US W4 CPA</th><th>🇩🇪 DE W1 CPA</th><th>🇩🇪 DE W4 CPA</th><th>US 改善</th><th>DE 改善</th><th>W4 哪个市场更优</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🍽️ Feeder</td><td>$40.1</td><td class="td-good">$22.8</td>
+          <td>$53.4</td><td>$44.5</td>
+          <td class="td-good">−43%</td><td class="td-warn">−17%</td>
+          <td class="td-good">🇺🇸 US 大幅优（$22.8 vs $44.5）</td>
+        </tr>
+        <tr>
+          <td>💧 Fountain</td><td>$23.3</td><td class="td-good">$17.0</td>
+          <td>$40.1</td><td>$30.5</td>
+          <td class="td-good">−27%</td><td class="td-warn">−24%</td>
+          <td class="td-good">🇺🇸 US 大幅优（$17.0 vs $30.5）</td>
+        </tr>
+        <tr>
+          <td>📦 Catalog</td><td>$32.5</td><td>$28.2</td>
+          <td>$34.5</td><td class="td-good">$25.3</td>
+          <td class="td-warn">−13%</td><td class="td-good">−27%</td>
+          <td class="td-good">🇩🇪 DE 略优（$25.3 vs $28.2）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <strong>跨市场产品线洞察：</strong>
+    Fountain 是美国绝对优势产品（US W4 CPA $17.0 vs DE $30.5），美国在这条线上的素材/受众积累明显更成熟。
+    Catalog 是德国的相对优势品类（DE W4 $25.3 vs US $28.2），德国再营销受众在目录投放上更高效。
+    Feeder 在两市场均在改善，但美国的改善速度（−43%）远超德国（−17%），德国在这条线上有较大提升空间。
+    <strong>建议：将美国 Feeder/Fountain 的高效素材翻译本地化后直接在德国测试。</strong>
+  </div>
+</div>
+
+<!-- ── COMPARE 7: Video vs Image cross-market ── -->
+<div class="dim-block">
+  <div class="dim-label">对比 07</div>
+  <div class="dim-title">视频 vs 图片策略 — 两市场完全相反的信号</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="videoImgCrossChart"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>素材类型</th><th>🇺🇸 US CPA</th><th>🇺🇸 US CTR</th><th>🇩🇪 DE CPA</th><th>🇩🇪 DE CTR</th><th>结论</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>🎬 视频</td>
+          <td class="td-good">$30.7</td><td>1.34%</td>
+          <td class="td-danger">$46.5</td><td>2.34%</td>
+          <td style="color:var(--warn)">US 视频有效，DE 视频高 CTR 不转化</td>
+        </tr>
+        <tr>
+          <td>🖼️ 图片</td>
+          <td>$34.3</td><td>0.87%</td>
+          <td class="td-good">$31.6</td><td>1.17%</td>
+          <td style="color:var(--us)">图片在两市场均有效，DE 图片甚至更优</td>
+        </tr>
+        <tr>
+          <td>📊 视频/图片 CPA 差</td>
+          <td class="td-good">视频低 $3.6 (−10.5%)</td><td>—</td>
+          <td class="td-danger">视频高 $14.9 (+47%)</td><td>—</td>
+          <td style="color:var(--danger)">两市场信号完全相反！</td>
+        </tr>
+        <tr>
+          <td>📦 素材数量</td>
+          <td>视频43 / 图片311</td><td>—</td>
+          <td>视频66 / 图片148</td><td>—</td>
+          <td style="color:var(--text-dim)">DE 视频占比更高但效率更差</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight danger">
+    ⚠️ <strong>核心矛盾：</strong>德国视频的 CTR（2.34%）比美国视频（1.34%）高出75%，但 CPA 却比美国高51%。这说明德国用户"爱看"英语视频但"不买"，存在明显的语言/文化摩擦力。相反，德国图片素材的 CPA（$31.6）比美国图片（$34.3）还要低 8%，说明视觉型素材跨语言障碍更低。<strong>结论：德国视频素材不是内容问题，是本地化问题。</strong>做德语配音后视频有可能超越图片。
+  </div>
+</div>
+
+<!-- ── COMPARE 8: Frequency model diff ── -->
+<div class="dim-block">
+  <div class="dim-label">对比 08</div>
+  <div class="dim-title">频率模型差异 — 受众结构根本不同</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="freqModelChart"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>频率区间</th><th>🇺🇸 US 典型 CPA</th><th>🇩🇪 DE 典型 CPA</th><th>差异说明</th></tr></thead>
+      <tbody>
+        <tr><td>频率 1.3–1.6（冷启动）</td><td class="td-danger">$151–$267（Luma系列）</td><td class="td-danger">$64–$134</td><td style="color:var(--text-dim)">两市场冷启动成本均高，DE 略低</td></tr>
+        <tr><td>频率 2.7–3.0</td><td>$34–$154（混合）</td><td>$43–$99</td><td style="color:var(--text-dim)">两市场均处于预热区</td></tr>
+        <tr><td>频率 3.5–4.5</td><td class="td-good">$17.6–$38（最优区）</td><td>$29–$54</td><td style="color:var(--us)">US 甜蜜区更低 CPA</td></tr>
+        <tr><td>频率 5.0–6.0</td><td class="td-good">$19–$34（仍健康）</td><td>—（无数据）</td><td style="color:var(--text-dim)">US 高频仍健康</td></tr>
+        <tr><td>频率 6.3–7.3</td><td class="td-warn">$31–$37（开始疲劳）</td><td class="td-good">$26.4（最优）⭐</td><td class="td-good">DE 高频反而更好！再营销受众特征</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight warn">
+    <strong>受众结构根本差异：</strong>美国账户有大量新客冷启动流量，频率分布从 1.6 到 7.3 均匀分布，疲劳拐点在 6.0。德国账户以再营销受众为主，最高频 Campaign（Best Sellers Catalog，频率7.0）反而是 CPA 最低的（$26.4）。这意味着<strong>德国的成熟受众池对频次"免疫"</strong>，加大再营销投入是低风险高回报动作。两市场的增长路径因此完全不同：美国靠新素材扩展冷启动，德国靠加深再营销渗透。
+  </div>
+</div>
+
+<!-- ── COMPARE 9: 30-day CPA decline trend ── -->
+<div class="dim-block">
+  <div class="dim-label">对比 09</div>
+  <div class="dim-title">7日滚动平均 CPA — 趋势收敛分析</div>
+
+  <div class="card chart-card">
+    <div class="chart-wrap" style="height:280px">
+      <canvas id="rollingAvgChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight good">
+    <strong>收敛趋势显著：</strong>两市场的7日滚动平均 CPA 均在月末实现明显收敛。美国从月初均值 ~$36 收敛至月末 ~$28（−22%），德国从 ~$52 收敛至 ~$26（−50%）。德国的收敛幅度更大，但起点更高、波动更剧烈，主要是因为月中的异常高 CPA 天拉高了均值。两市场的<strong>收敛终点高度接近</strong>（均约 $26–$28），说明在去除噪音后，两市场的基础效率趋于一致。
+  </div>
+</div>
+
+<!-- ─────────────────── ACTION PLAN ─────────────────── -->
+<hr class="section-divider">
+<div style="margin-bottom:12px">
+  <div class="dim-label">综合行动建议</div>
+  <div class="dim-title">两市场优先级操作清单</div>
+</div>
+
+<div class="callout-grid">
+  <div class="callout danger">
+    <div class="callout-title">🚨 US 紧急行动</div>
+    <ul>
+      <li><strong>Luma 猫砂盆</strong>：CPA 4周升78%，CTR升但购买降。立即暂停 Maxvalue/Cat-People/PDP adset，集中预算到 <strong>KOL Launch</strong>（唯一健康 campaign，CPA $31.3）</li>
+      <li><strong>关停浪费预算</strong>：LB001 ViewContent + ATC 两个 campaign，共 $1,346 零转化</li>
+      <li><strong>加大视频产能</strong>：视频 CPA 比图片低10.5%，但只有43条 vs 图片311条。视频是最大增长杠杆</li>
+    </ul>
+  </div>
+  <div class="callout good">
+    <div class="callout-title">✅ US 加速扩量</div>
+    <ul>
+      <li><strong>AF203 Feeder</strong>：CPA $17.6，频率4.3，headroom 充足，可加量</li>
+      <li><strong>WF116 Fountain</strong>：CPA $19.1，频率5.3，素材池质量强，加量</li>
+      <li><strong>W4 趋势追踪</strong>：确认 W5 完整数据看 CPA 下行是否持续</li>
+    </ul>
+  </div>
+  <div class="callout danger">
+    <div class="callout-title">🚨 DE 紧急行动</div>
+    <ul>
+      <li><strong>停止加投视频</strong>：DE 视频 CPA $46.5 vs 图片 $31.6，相差32%。先做德语 voiceover/字幕本地化</li>
+      <li><strong>关停 LINK_CLICKS campaign</strong>：$579 零购买，只有 CTR 没有转化</li>
+      <li><strong>确认 2/21 拐点原因</strong>：查清当天关停了哪个 campaign，确保不会反复</li>
+    </ul>
+  </div>
+  <div class="callout good">
+    <div class="callout-title">✅ DE 加速扩量</div>
+    <ul>
+      <li><strong>Best Sellers Catalog 金矿</strong>：频率7.0但 CPA $26.4，再营销受众越投越准，大力加预算</li>
+      <li><strong>Catalog 基盘</strong>：W4→W5 连续改善，W5 CPA $24.0，趋势向好</li>
+      <li><strong>加购/购买比修复</strong>：DE 加购/购买比 17.8:1（US 仅2.1:1），落地页或结账流程有根本性断层需排查</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- end .doc -->
+
+<footer>Petlibro · Ad Performance Report · 美国 &amp; 德国市场 · 近30天 · 2026-02-02 → 2026-03-03</footer>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// CHART.JS GLOBAL CONFIG
+// ════════════════════════════════════════════════════════════
+Chart.defaults.color = '#7080a0';
+Chart.defaults.borderColor = '#1e2840';
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 11;
+
+const US_COLOR = '#4af0a0';
+const DE_COLOR = '#4ab0f0';
+const DANGER = '#f05060';
+const WARN = '#f0b040';
+const ACCENT = '#6070ff';
+const MUTED = '#3a4560';
+
+// ════════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════════
+const usDailyData = [
+  ['02-02',4805,169,28.4,546598,5134,0.94],['02-03',4937,143,34.5,610795,5502,0.90],
+  ['02-04',4992,150,33.3,603433,5325,0.88],['02-05',5681,135,42.1,675856,5970,0.88],
+  ['02-06',6160,170,36.2,789118,6083,0.77],['02-07',5806,156,37.2,658825,5657,0.86],
+  ['02-08',6584,168,39.2,809643,6938,0.86],['02-09',6148,169,36.4,779409,5872,0.75],
+  ['02-10',5576,137,40.7,628242,5295,0.84],['02-11',5629,158,35.6,624176,6206,0.99],
+  ['02-12',5872,156,37.6,626635,5820,0.93],['02-13',5638,195,28.9,621165,5908,0.95],
+  ['02-14',5524,161,34.3,585356,5779,0.99],['02-15',6475,179,36.2,801606,6957,0.87],
+  ['02-16',5918,174,34.0,660878,6627,1.00],['02-17',5601,176,31.8,660490,6783,1.03],
+  ['02-18',5751,155,37.1,675310,7118,1.05],['02-19',5550,189,29.4,612788,7426,1.21],
+  ['02-20',5936,150,39.6,721008,7786,1.08],['02-21',6044,134,45.1,610678,7977,1.31],
+  ['02-22',6388,161,39.7,751466,8415,1.12],['02-23',5868,192,30.6,706538,7657,1.08],
+  ['02-24',5580,199,28.0,655397,7695,1.17],['02-25',5259,171,30.8,603366,6978,1.16],
+  ['02-26',5241,184,28.5,606178,6611,1.09],['02-27',5661,238,23.8,639914,7200,1.13],
+  ['02-28',5772,256,22.5,615256,7152,1.16],['03-01',6683,193,34.6,836093,9268,1.11],
+  ['03-02',5763,216,26.7,634308,8558,1.35],['03-03',5959,168,35.5,701785,8187,1.17]
+];
+
+const deDailyData = [
+  ['02-02',1028,21,49.0,120832,1818,1.50],['02-03',973,28,34.8,107652,1665,1.55],
+  ['02-04',974,26,37.5,101381,1737,1.71],['02-05',895,16,55.9,91407,1539,1.68],
+  ['02-06',746,22,33.9,85894,1307,1.52],['02-07',678,26,26.1,73953,1495,2.02],
+  ['02-08',911,27,33.7,103907,1779,1.71],['02-09',927,32,29.0,117706,1699,1.44],
+  ['02-10',1041,13,80.1,114878,1633,1.42],['02-11',1126,33,34.1,126709,1819,1.44],
+  ['02-12',1066,17,62.7,121787,1769,1.45],['02-13',1004,20,50.2,115982,1616,1.39],
+  ['02-14',778,18,43.2,88822,1279,1.44],['02-15',1082,22,49.2,127168,1749,1.38],
+  ['02-16',1010,35,28.9,117980,1706,1.45],['02-17',928,27,34.4,107137,1540,1.44],
+  ['02-18',854,9,94.9,99103,1315,1.33],['02-19',779,12,64.9,87310,1250,1.43],
+  ['02-20',778,13,59.8,84950,1305,1.54],['02-21',629,29,21.7,64979,1098,1.69],
+  ['02-22',909,41,22.2,100566,1574,1.57],['02-23',891,35,25.4,104731,1355,1.29],
+  ['02-24',909,30,30.3,95723,1316,1.37],['02-25',905,33,27.4,93400,1288,1.38],
+  ['02-26',912,25,36.5,93499,1198,1.28],['02-27',897,35,25.6,88836,1331,1.50],
+  ['02-28',858,43,20.0,81889,1265,1.54],['03-01',1119,34,32.9,117304,1615,1.38],
+  ['03-02',944,39,24.2,100339,1369,1.36],['03-03',1004,30,33.5,102286,1498,1.46]
+];
+
+// ── Build daily tables ──
+function buildDailyTable(tableId, data) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  data.forEach(([d,sp,pur,cpa,imp,clk,ctr]) => {
+    const tr = document.createElement('tr');
+    const cpaClass = cpa > 60 ? 'td-danger' : cpa > 40 ? 'td-warn' : cpa < 28 ? 'td-good' : '';
+    tr.innerHTML = `<td>2026-${d}</td><td>${sp.toLocaleString()}</td><td>${pur}</td>
+      <td class="${cpaClass}">${cpa}</td><td>${imp.toLocaleString()}</td>
+      <td>${clk.toLocaleString()}</td><td>${ctr}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+buildDailyTable('usDailyTable', usDailyData);
+buildDailyTable('deDailyTable', deDailyData);
+
+// ════════════════════════════════════════════════════════════
+// CHARTS
+// ════════════════════════════════════════════════════════════
+
+// ── US Daily ──
+new Chart(document.getElementById('usDailyChart'), {
+  type: 'line',
+  data: {
+    labels: usDailyData.map(d => d[0]),
+    datasets: [
+      {
+        label: 'CPA ($)',
+        data: usDailyData.map(d => d[3]),
+        borderColor: US_COLOR, backgroundColor: 'rgba(74,240,160,0.08)',
+        tension: 0.3, pointRadius: 3, pointHoverRadius: 5, yAxisID: 'yCpa',
+        fill: true
+      },
+      {
+        label: '花费 ($)',
+        data: usDailyData.map(d => d[1]),
+        borderColor: ACCENT, backgroundColor: 'transparent',
+        tension: 0.3, pointRadius: 0, yAxisID: 'ySpend',
+        borderDash: [4,3], borderWidth: 1.5
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { boxWidth: 12, padding: 16 } },
+      annotation: {}
+    },
+    scales: {
+      x: { grid: { color: '#1a2035' }, ticks: { maxTicksLimit: 15 } },
+      yCpa: { position: 'left', grid: { color: '#1a2035' }, title: { display: true, text: 'CPA ($)' } },
+      ySpend: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '花费 ($)' } }
+    }
+  }
+});
+
+// ── DE Daily ──
+new Chart(document.getElementById('deDailyChart'), {
+  type: 'line',
+  data: {
+    labels: deDailyData.map(d => d[0]),
+    datasets: [
+      {
+        label: 'CPA ($)',
+        data: deDailyData.map(d => d[3]),
+        borderColor: DE_COLOR, backgroundColor: 'rgba(74,176,240,0.08)',
+        tension: 0.3, pointRadius: 3, pointHoverRadius: 5, yAxisID: 'yCpa', fill: true
+      },
+      {
+        label: '花费 ($)',
+        data: deDailyData.map(d => d[1]),
+        borderColor: ACCENT, backgroundColor: 'transparent',
+        tension: 0.3, pointRadius: 0, yAxisID: 'ySpend',
+        borderDash: [4,3], borderWidth: 1.5
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { labels: { boxWidth: 12, padding: 16 } } },
+    scales: {
+      x: { grid: { color: '#1a2035' }, ticks: { maxTicksLimit: 15 } },
+      yCpa: { position: 'left', grid: { color: '#1a2035' }, title: { display: true, text: 'CPA ($)' } },
+      ySpend: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '花费 ($)' } }
+    }
+  }
+});
+
+// ── US Video vs Image ──
+new Chart(document.getElementById('usVideoImgChart'), {
+  type: 'bar',
+  data: {
+    labels: ['CPA ($)', 'CTR (%)', '素材数量'],
+    datasets: [
+      {
+        label: '视频',
+        data: [30.7, 1.34, 43],
+        backgroundColor: ['rgba(74,240,160,0.7)', 'rgba(74,240,160,0.7)', 'rgba(74,240,160,0.7)'],
+        borderColor: US_COLOR, borderWidth: 1, borderRadius: 4
+      },
+      {
+        label: '图片',
+        data: [34.3, 0.87, 311],
+        backgroundColor: ['rgba(96,112,255,0.5)', 'rgba(96,112,255,0.5)', 'rgba(96,112,255,0.5)'],
+        borderColor: ACCENT, borderWidth: 1, borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { boxWidth: 10, padding: 16 } } },
+    scales: {
+      x: { grid: { color: '#1a2035' } },
+      y: { grid: { color: '#1a2035' } }
+    }
+  }
+});
+
+// ── DE Video vs Image ──
+new Chart(document.getElementById('deVideoImgChart'), {
+  type: 'bar',
+  data: {
+    labels: ['CPA ($)', 'CTR (%)', '素材数量'],
+    datasets: [
+      {
+        label: '视频',
+        data: [46.5, 2.34, 66],
+        backgroundColor: ['rgba(240,80,96,0.6)', 'rgba(240,80,96,0.6)', 'rgba(240,80,96,0.6)'],
+        borderColor: DANGER, borderWidth: 1, borderRadius: 4
+      },
+      {
+        label: '图片',
+        data: [31.6, 1.17, 148],
+        backgroundColor: ['rgba(74,240,160,0.7)', 'rgba(74,240,160,0.7)', 'rgba(74,240,160,0.7)'],
+        borderColor: US_COLOR, borderWidth: 1, borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { boxWidth: 10, padding: 16 } } },
+    scales: {
+      x: { grid: { color: '#1a2035' } },
+      y: { grid: { color: '#1a2035' } }
+    }
+  }
+});
+
+// ── Frequency Charts ──
+function makeFreqChart(canvasId, data, color) {
+  const sorted = [...data].sort((a,b) => a.freq - b.freq);
+  new Chart(document.getElementById(canvasId), {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'Campaign',
+        data: sorted.filter(d=>d.cpa>0).map(d=>({x:d.freq, y:d.cpa, label:d.name})),
+        backgroundColor: sorted.filter(d=>d.cpa>0).map(d => d.cpa < 30 ? 'rgba(74,240,160,0.8)' : d.cpa > 60 ? 'rgba(240,80,96,0.8)' : 'rgba(240,176,64,0.8)'),
+        pointRadius: 7, pointHoverRadius: 9
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.raw.label}: freq ${ctx.raw.x} | CPA $${ctx.raw.y}`
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: '频率' }, grid: { color: '#1a2035' } },
+        y: { title: { display: true, text: 'CPA ($)' }, grid: { color: '#1a2035' } }
+      }
+    }
+  });
+}
+
+makeFreqChart('usFreqChart', [
+  {name:'SALE1 Maxconv',freq:1.6,cpa:151.1},{name:'LB001 PDP AB',freq:1.8,cpa:267.4},
+  {name:'LB001 Maxvalue',freq:2.1,cpa:160.8},{name:'LB001 Cat-People',freq:2.2,cpa:208.4},
+  {name:'WFDS2 KOL',freq:2.2,cpa:50.0},{name:'SALE1 Copy',freq:2.9,cpa:153.9},
+  {name:'Ongoing Audience',freq:3.0,cpa:33.9},{name:'LB001 Max Conv',freq:3.7,cpa:47.4},
+  {name:'PC001 Launch',freq:3.9,cpa:36.3},{name:'AF301 CPA Bid',freq:4.1,cpa:38.0},
+  {name:'AF203 Maxvalue',freq:4.3,cpa:17.6},{name:'AF109 Maxconv',freq:4.5,cpa:30.9},
+  {name:'Catalog ASC',freq:4.9,cpa:27.2},{name:'Sale Catalog ASC',freq:5.2,cpa:33.8},
+  {name:'WF116 Maxconv',freq:5.3,cpa:19.1},{name:'AF301 Maxconv',freq:6.3,cpa:37.0},
+  {name:'LB001 KOL Launch',freq:7.3,cpa:31.3}
+], US_COLOR);
+
+makeFreqChart('deFreqChart', [
+  {name:'AF000 新Cbo',freq:1.3,cpa:133.8},{name:'ASC Catalog新',freq:1.6,cpa:64.2},
+  {name:'ATC Maxconv',freq:2.7,cpa:99.0},{name:'WFDS2 Cbo',freq:2.8,cpa:42.9},
+  {name:'WF000 ASC',freq:3.5,cpa:29.8},{name:'VDay Promo',freq:3.5,cpa:61.4},
+  {name:'Retargeting',freq:3.6,cpa:45.6},{name:'KOL-INS Abo',freq:3.6,cpa:38.2},
+  {name:'AF000 Abo',freq:3.8,cpa:53.5},{name:'WFDS2 ASC Launch',freq:4.5,cpa:36.2},
+  {name:'Best Sellers Cat',freq:7.0,cpa:26.4}
+], DE_COLOR);
+
+// ── Product line mini charts (US) ──
+function makeProductChart(id, labels, cpaData, color) {
+  new Chart(document.getElementById(id), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: cpaData,
+        borderColor: color, backgroundColor: color.replace(')', ',0.1)').replace('rgb','rgba'),
+        tension: 0.3, fill: true,
+        pointRadius: 4, pointBackgroundColor: color,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#1a2035' }, ticks: { font: { size: 10 } } },
+        y: { grid: { color: '#1a2035' }, title: { display: true, text: 'CPA ($)', font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+const wks = ['W1','W2','W3','W4','W5'];
+makeProductChart('usFeederChart', wks, [40.1,30.2,31.4,22.8,22.2], '#4af0a0');
+makeProductChart('usFountainChart', wks, [23.3,23.2,22.0,17.0,16.7], '#4ab0f0');
+makeProductChart('usLumaChart', wks, [43.1,60.8,67.2,55.7,76.8], '#f05060');
+makeProductChart('usCatalogChart', wks, [32.5,31.1,33.8,28.2,34.4], '#f0b040');
+makeProductChart('usPromoChart', wks, [76.0,50.3,44.7,33.0,33.7], '#a070ff');
+makeProductChart('deCatalogChart', wks, [34.5,43.0,31.7,25.3,24.0], '#4ab0f0');
+makeProductChart('deFountainChart', wks, [40.1,42.4,33.1,30.5,40.3], '#4af0a0');
+makeProductChart('deFeederChart', wks, [53.4,55.9,106.5,44.5,34.2], '#f0b040');
+
+// ── US Weekly Summary ──
+new Chart(document.getElementById('usWeeklyChart'), {
+  type: 'bar',
+  data: {
+    labels: ['W1 (2/2)','W2 (2/9)','W3 (2/16)','W4 (2/23)','W5 (3/2)'],
+    datasets: [
+      {
+        type: 'bar', label: '购买数',
+        data: [1091,1155,1139,1433,384],
+        backgroundColor: 'rgba(74,240,160,0.4)', borderColor: US_COLOR,
+        borderWidth: 1, borderRadius: 3, yAxisID: 'yPurch'
+      },
+      {
+        type: 'line', label: 'CPA ($)',
+        data: [35.7,35.4,36.2,28.0,30.5],
+        borderColor: WARN, backgroundColor: 'transparent',
+        tension: 0.3, pointRadius: 5, yAxisID: 'yCpa', borderWidth: 2
+      },
+      {
+        type: 'line', label: '花费 ($)',
+        data: [38965,40863,41188,40064,11722],
+        borderColor: ACCENT, backgroundColor: 'transparent',
+        tension: 0.3, pointRadius: 0, yAxisID: 'ySpend',
+        borderDash: [4,3], borderWidth: 1.5
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { labels: { boxWidth: 10, padding: 16 } } },
+    scales: {
+      x: { grid: { color: '#1a2035' } },
+      yPurch: { position: 'left', grid: { color: '#1a2035' }, title: { display: true, text: '购买数' } },
+      yCpa: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'CPA ($)' } },
+      ySpend: { display: false }
+    }
+  }
+});
+
+// ── DE Weekly Summary ──
+new Chart(document.getElementById('deWeeklyChart'), {
+  type: 'bar',
+  data: {
+    labels: ['W1 (2/2)','W2 (2/9)','W3 (2/16)','W4 (2/23)','W5 (3/2)'],
+    datasets: [
+      {
+        type: 'bar', label: '购买数',
+        data: [166,155,166,235,69],
+        backgroundColor: 'rgba(74,176,240,0.4)', borderColor: DE_COLOR,
+        borderWidth: 1, borderRadius: 3, yAxisID: 'yPurch'
+      },
+      {
+        type: 'line', label: 'CPA ($)',
+        data: [37.4,45.3,35.5,27.6,28.2],
+        borderColor: WARN, backgroundColor: 'transparent',
+        tension: 0.3, pointRadius: 5, yAxisID: 'yCpa', borderWidth: 2
+      },
+      {
+        type: 'line', label: '花费 ($)',
+        data: [6206,7025,5887,6492,1948],
+        borderColor: ACCENT, backgroundColor: 'transparent',
+        tension: 0.3, pointRadius: 0, yAxisID: 'ySpend',
+        borderDash: [4,3], borderWidth: 1.5
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { labels: { boxWidth: 10, padding: 16 } } },
+    scales: {
+      x: { grid: { color: '#1a2035' } },
+      yPurch: { position: 'left', grid: { color: '#1a2035' }, title: { display: true, text: '购买数' } },
+      yCpa: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'CPA ($)' } },
+      ySpend: { display: false }
+    }
+  }
+});
+// ════════════════════════════════════════════════════════════
+// COMPARISON CHARTS
+// ════════════════════════════════════════════════════════════
+
+const dailyLabels = ['02-02','02-03','02-04','02-05','02-06','02-07','02-08','02-09','02-10',
+  '02-11','02-12','02-13','02-14','02-15','02-16','02-17','02-18','02-19',
+  '02-20','02-21','02-22','02-23','02-24','02-25','02-26','02-27','02-28',
+  '03-01','03-02','03-03'];
+const usCpaDaily = [28.4,34.5,33.3,42.1,36.2,37.2,39.2,36.4,40.7,35.6,37.6,28.9,34.3,36.2,
+  34.0,31.8,37.1,29.4,39.6,45.1,39.7,30.6,28.0,30.8,28.5,23.8,22.5,34.6,26.7,35.5];
+const deCpaDaily = [49.0,34.8,37.5,55.9,33.9,26.1,33.7,29.0,80.1,34.1,62.7,50.2,43.2,49.2,
+  28.9,34.4,94.9,64.9,59.8,21.7,22.2,25.4,30.3,27.4,36.5,25.6,20.0,32.9,24.2,33.5];
+const usCtrDaily = [0.94,0.90,0.88,0.88,0.77,0.86,0.86,0.75,0.84,0.99,0.93,0.95,0.99,0.87,
+  1.00,1.03,1.05,1.21,1.08,1.31,1.12,1.08,1.17,1.16,1.09,1.13,1.16,1.11,1.35,1.17];
+const deCtrDaily = [1.50,1.55,1.71,1.68,1.52,2.02,1.71,1.44,1.42,1.44,1.45,1.39,1.44,1.38,
+  1.45,1.44,1.33,1.43,1.54,1.69,1.57,1.29,1.37,1.38,1.28,1.50,1.54,1.38,1.36,1.46];
+
+const wkLabels5 = ['W1 (2/2)','W2 (2/9)','W3 (2/16)','W4 (2/23)','W5 (3/2)'];
+
+// ── 1. Dual CPA Daily Overlay ──
+new Chart(document.getElementById('cpaDualChart'), {
+  type: 'line',
+  data: {
+    labels: dailyLabels,
+    datasets: [
+      {
+        label: '🇺🇸 US CPA ($)',
+        data: usCpaDaily,
+        borderColor: US_COLOR, backgroundColor: 'rgba(74,240,160,0.06)',
+        tension: 0.3, pointRadius: 2, borderWidth: 2, fill: true
+      },
+      {
+        label: '🇩🇪 DE CPA ($)',
+        data: deCpaDaily,
+        borderColor: DE_COLOR, backgroundColor: 'rgba(74,176,240,0.06)',
+        tension: 0.3, pointRadius: 2, borderWidth: 2, fill: true
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { boxWidth: 12, padding: 16 } },
+      annotation: {}
+    },
+    scales: {
+      x: { grid: { color: '#1a2035' }, ticks: { maxTicksLimit: 15 } },
+      y: { grid: { color: '#1a2035' }, title: { display: true, text: 'CPA ($)' } }
+    }
+  }
+});
+
+// ── 2. Weekly CPA Dual ──
+new Chart(document.getElementById('weeklyCpaDualChart'), {
+  type: 'line',
+  data: {
+    labels: wkLabels5,
+    datasets: [
+      {
+        label: '🇺🇸 US CPA ($)',
+        data: [35.7,35.4,36.2,28.0,30.5],
+        borderColor: US_COLOR, backgroundColor: 'rgba(74,240,160,0.1)',
+        tension: 0.3, pointRadius: 6, pointBackgroundColor: US_COLOR,
+        borderWidth: 2.5, fill: true
+      },
+      {
+        label: '🇩🇪 DE CPA ($)',
+        data: [37.4,45.3,35.5,27.6,28.2],
+        borderColor: DE_COLOR, backgroundColor: 'rgba(74,176,240,0.1)',
+        tension: 0.3, pointRadius: 6, pointBackgroundColor: DE_COLOR,
+        borderWidth: 2.5, fill: true
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { labels: { boxWidth: 12, padding: 16 } } },
+    scales: {
+      x: { grid: { color: '#1a2035' } },
+      y: { grid: { color: '#1a2035' }, title: { display: true, text: 'CPA ($)' }, min: 20, max: 52 }
+    }
+  }
+});
+
+// ── 3. Spend Efficiency (purchases per $1000) ──
+new Chart(document.getElementById('efficiencyChart'), {
+  type: 'bar',
+  data: {
+    labels: wkLabels5,
+    datasets: [
+      {
+        label: '🇺🇸 US 购买/千元花费',
+        data: [28.0, 28.3, 27.7, 35.8, 32.8],
+        backgroundColor: 'rgba(74,240,160,0.7)', borderColor: US_COLOR,
+        borderWidth: 1, borderRadius: 4
+      },
+      {
+        label: '🇩🇪 DE 购买/千元花费',
+        data: [26.7, 22.1, 28.2, 36.2, 35.4],
+        backgroundColor: 'rgba(74,176,240,0.7)', borderColor: DE_COLOR,
+        borderWidth: 1, borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { labels: { boxWidth: 10, padding: 16 } } },
+    scales: {
+      x: { grid: { color: '#1a2035' } },
+      y: { grid: { color: '#1a2035' }, title: { display: true, text: '购买数 / 千元花费' } }
+    }
+  }
+});
+
+// ── 4. CTR Dual Daily ──
+new Chart(document.getElementById('ctrDualChart'), {
+  type: 'line',
+  data: {
+    labels: dailyLabels,
+    datasets: [
+      {
+        label: '🇺🇸 US CTR (%)',
+        data: usCtrDaily,
+        borderColor: US_COLOR, backgroundColor: 'transparent',
+        tension: 0.3, pointRadius: 0, borderWidth: 2
+      },
+      {
+        label: '🇩🇪 DE CTR (%)',
+        data: deCtrDaily,
+        borderColor: DE_COLOR, backgroundColor: 'rgba(74,176,240,0.08)',
+        tension: 0.3, pointRadius: 0, borderWidth: 2, fill: true
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { labels: { boxWidth: 12, padding: 16 } } },
+    scales: {
+      x: { grid: { color: '#1a2035' }, ticks: { maxTicksLimit: 15 } },
+      y: { grid: { color: '#1a2035' }, title: { display: true, text: 'CTR (%)' } }
+    }
+  }
+});
+
+// ── 5. Product Line Cross-Market CPA grouped ──
+new Chart(document.getElementById('productCrossChart'), {
+  type: 'bar',
+  data: {
+    labels: ['W1','W2','W3','W4','W5'],
+    datasets: [
+      { label: '🇺🇸 Feeder', data: [40.1,30.2,31.4,22.8,22.2], backgroundColor: 'rgba(74,240,160,0.8)', borderRadius: 3 },
+      { label: '🇩🇪 Feeder', data: [53.4,55.9,106.5,44.5,34.2], backgroundColor: 'rgba(74,240,160,0.3)', borderColor: US_COLOR, borderWidth: 1, borderRadius: 3 },
+      { label: '🇺🇸 Fountain', data: [23.3,23.2,22.0,17.0,16.7], backgroundColor: 'rgba(74,176,240,0.8)', borderRadius: 3 },
+      { label: '🇩🇪 Fountain', data: [40.1,42.4,33.1,30.5,40.3], backgroundColor: 'rgba(74,176,240,0.3)', borderColor: DE_COLOR, borderWidth: 1, borderRadius: 3 },
+      { label: '🇺🇸 Catalog', data: [32.5,31.1,33.8,28.2,34.4], backgroundColor: 'rgba(240,176,64,0.8)', borderRadius: 3 },
+      { label: '🇩🇪 Catalog', data: [34.5,43.0,31.7,25.3,24.0], backgroundColor: 'rgba(240,176,64,0.3)', borderColor: WARN, borderWidth: 1, borderRadius: 3 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { labels: { boxWidth: 10, padding: 10, font: { size: 10 } } } },
+    scales: {
+      x: { grid: { color: '#1a2035' } },
+      y: { grid: { color: '#1a2035' }, title: { display: true, text: 'CPA ($)' } }
+    }
+  }
+});
+
+// ── 6. Video vs Image Cross-Market Radar-style bar ──
+new Chart(document.getElementById('videoImgCrossChart'), {
+  type: 'bar',
+  data: {
+    labels: ['🇺🇸 视频 CPA', '🇺🇸 图片 CPA', '🇩🇪 视频 CPA', '🇩🇪 图片 CPA'],
+    datasets: [
+      {
+        label: 'CPA ($)',
+        data: [30.7, 34.3, 46.5, 31.6],
+        backgroundColor: [
+          'rgba(74,240,160,0.8)',
+          'rgba(74,240,160,0.4)',
+          'rgba(240,80,96,0.8)',
+          'rgba(74,176,240,0.7)',
+        ],
+        borderColor: [US_COLOR, US_COLOR, DANGER, DE_COLOR],
+        borderWidth: 1.5, borderRadius: 5
+      },
+      {
+        label: 'CTR (%)',
+        data: [1.34, 0.87, 2.34, 1.17],
+        backgroundColor: 'transparent',
+        borderColor: WARN,
+        type: 'line',
+        tension: 0.3,
+        pointRadius: 6,
+        pointBackgroundColor: WARN,
+        yAxisID: 'yCtr',
+        borderWidth: 2
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { labels: { boxWidth: 10, padding: 16 } } },
+    scales: {
+      x: { grid: { color: '#1a2035' } },
+      y: { grid: { color: '#1a2035' }, title: { display: true, text: 'CPA ($)' } },
+      yCtr: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'CTR (%)' } }
+    }
+  }
+});
+
+// ── 7. Frequency Model Comparison scatter ──
+new Chart(document.getElementById('freqModelChart'), {
+  type: 'scatter',
+  data: {
+    datasets: [
+      {
+        label: '🇺🇸 US Campaigns',
+        data: [
+          {x:1.6,y:151.1},{x:1.8,y:267.4},{x:2.1,y:160.8},{x:2.2,y:208.4},{x:2.2,y:50.0},
+          {x:2.9,y:153.9},{x:3.0,y:33.9},{x:3.7,y:47.4},{x:3.9,y:36.3},{x:4.1,y:38.0},
+          {x:4.3,y:17.6},{x:4.5,y:30.9},{x:4.9,y:27.2},{x:5.2,y:33.8},{x:5.3,y:19.1},
+          {x:6.3,y:37.0},{x:7.3,y:31.3}
+        ],
+        backgroundColor: 'rgba(74,240,160,0.75)', pointRadius: 7, pointHoverRadius: 9
+      },
+      {
+        label: '🇩🇪 DE Campaigns',
+        data: [
+          {x:1.3,y:133.8},{x:1.6,y:64.2},{x:2.7,y:99.0},{x:2.8,y:42.9},
+          {x:3.5,y:29.8},{x:3.5,y:61.4},{x:3.6,y:45.6},{x:3.6,y:38.2},
+          {x:3.8,y:53.5},{x:4.5,y:36.2},{x:7.0,y:26.4}
+        ],
+        backgroundColor: 'rgba(74,176,240,0.75)', pointRadius: 7, pointHoverRadius: 9
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'point' },
+    plugins: { legend: { labels: { boxWidth: 12, padding: 16 } } },
+    scales: {
+      x: { grid: { color: '#1a2035' }, title: { display: true, text: '频率' } },
+      y: { grid: { color: '#1a2035' }, title: { display: true, text: 'CPA ($)' } }
+    }
+  }
+});
+
+// ── 8. 7-Day Rolling Average CPA ──
+function rollingAvg(arr, n) {
+  return arr.map((_, i) => {
+    if (i < n - 1) return null;
+    const slice = arr.slice(i - n + 1, i + 1);
+    return Math.round(slice.reduce((s, v) => s + v, 0) / n * 10) / 10;
+  });
+}
+const usRolling = rollingAvg(usCpaDaily, 7);
+const deRolling = rollingAvg(deCpaDaily, 7);
+
+new Chart(document.getElementById('rollingAvgChart'), {
+  type: 'line',
+  data: {
+    labels: dailyLabels,
+    datasets: [
+      {
+        label: '🇺🇸 US 7日均线 CPA',
+        data: usRolling,
+        borderColor: US_COLOR, backgroundColor: 'rgba(74,240,160,0.06)',
+        tension: 0.4, pointRadius: 0, borderWidth: 2.5, fill: true
+      },
+      {
+        label: '🇩🇪 DE 7日均线 CPA',
+        data: deRolling,
+        borderColor: DE_COLOR, backgroundColor: 'rgba(74,176,240,0.06)',
+        tension: 0.4, pointRadius: 0, borderWidth: 2.5, fill: true
+      },
+      {
+        label: '🇺🇸 US 原始 CPA',
+        data: usCpaDaily,
+        borderColor: 'rgba(74,240,160,0.25)', backgroundColor: 'transparent',
+        tension: 0.2, pointRadius: 0, borderWidth: 1, borderDash: [3,3]
+      },
+      {
+        label: '🇩🇪 DE 原始 CPA',
+        data: deCpaDaily,
+        borderColor: 'rgba(74,176,240,0.25)', backgroundColor: 'transparent',
+        tension: 0.2, pointRadius: 0, borderWidth: 1, borderDash: [3,3]
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { labels: { boxWidth: 12, padding: 12, font: { size: 10 } } } },
+    scales: {
+      x: { grid: { color: '#1a2035' }, ticks: { maxTicksLimit: 15 } },
+      y: { grid: { color: '#1a2035' }, title: { display: true, text: 'CPA ($)' } }
+    }
+  }
+});
+
+
